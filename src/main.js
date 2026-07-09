@@ -1,62 +1,157 @@
-import './style.css'
-import javascriptLogo from './assets/javascript.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import { setupCounter } from './counter.js'
+import './style.css';
+import { supabase } from './supabaseClient.js';
 
-document.querySelector('#app').innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${javascriptLogo}" class="framework" alt="JavaScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.js</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+const appEl = document.querySelector('#app');
 
-<div class="ticks"></div>
+// Mostrar errores o mensajes de éxito
+function showMessage(type, text) {
+  const errorEl = document.getElementById('auth-error');
+  const successEl = document.getElementById('auth-success');
+  
+  if (!errorEl || !successEl) return;
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-          <img class="button-icon" src="${javascriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+  if (type === 'error') {
+    errorEl.textContent = text;
+    errorEl.style.display = 'block';
+    successEl.style.display = 'none';
+  } else if (type === 'success') {
+    successEl.textContent = text;
+    successEl.style.display = 'block';
+    errorEl.style.display = 'none';
+  } else {
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+  }
+}
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+// Renderizar pantalla de Autenticación
+function renderAuthForm() {
+  appEl.innerHTML = `
+    <div class="auth-container">
+      <div class="auth-card">
+        <h2>Ingresar o Registrarse</h2>
+        
+        <div id="auth-error" class="auth-error"></div>
+        <div id="auth-success" class="auth-success"></div>
 
-setupCounter(document.querySelector('#counter'))
+        <form id="auth-form">
+          <div class="auth-group">
+            <label for="email">Correo Electrónico</label>
+            <input type="email" id="email" class="auth-input" placeholder="ejemplo@correo.com" required autocomplete="username" />
+          </div>
+          
+          <div class="auth-group">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" class="auth-input" placeholder="••••••••" required autocomplete="current-password" />
+          </div>
 
+          <div class="auth-buttons-row">
+            <button type="submit" id="btn-login" class="auth-btn auth-btn-primary">Iniciar sesión</button>
+            <button type="button" id="btn-register" class="auth-btn auth-btn-secondary">Registrarse</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
 
+  const form = document.getElementById('auth-form');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const btnLogin = document.getElementById('btn-login');
+  const btnRegister = document.getElementById('btn-register');
+
+  // Helper para deshabilitar controles durante la carga
+  function setSubmitting(isSubmitting) {
+    emailInput.disabled = isSubmitting;
+    passwordInput.disabled = isSubmitting;
+    btnLogin.disabled = isSubmitting;
+    btnRegister.disabled = isSubmitting;
+    
+    if (isSubmitting) {
+      btnLogin.textContent = 'Procesando...';
+    } else {
+      btnLogin.textContent = 'Iniciar sesión';
+    }
+  }
+
+  // Acción: Iniciar Sesión
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    showMessage('clear');
+    setSubmitting(true);
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      showMessage('error', error.message || 'Error al iniciar sesión.');
+      setSubmitting(false);
+    }
+    // Si tiene éxito, onAuthStateChange se encargará de actualizar la vista
+  });
+
+  // Acción: Registrarse
+  btnRegister.addEventListener('click', async () => {
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    showMessage('clear');
+    setSubmitting(true);
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) {
+      showMessage('error', error.message || 'Error al registrarse.');
+      setSubmitting(false);
+    } else {
+      // En Supabase, dependiendo de la configuración de confirmación de email:
+      // Si está activa, pedirá confirmación. Si no, iniciará sesión automáticamente.
+      if (data?.user && data?.session === null) {
+        showMessage('success', '¡Registro exitoso! Por favor, verifica tu correo electrónico para confirmar tu cuenta.');
+      } else {
+        showMessage('success', '¡Usuario registrado e ingresado con éxito!');
+      }
+      setSubmitting(false);
+    }
+  });
+}
+
+// Renderizar pantalla Dashboard de usuario logueado
+function renderDashboard(session) {
+  const userEmail = session.user.email;
+
+  appEl.innerHTML = `
+    <div class="user-dashboard">
+      <h1>¡Bienvenido/a!</h1>
+      <p>Has iniciado sesión con el correo: <strong>${userEmail}</strong></p>
+      
+      <button id="btn-logout" class="auth-btn auth-btn-primary" style="max-width: 200px; margin: 0 auto;">
+        Cerrar sesión
+      </button>
+    </div>
+  `;
+
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      alert('Error al cerrar sesión: ' + error.message);
+    }
+  });
+}
+
+// Escuchar cambios de estado de autenticación de Supabase de manera reactiva
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log(`Evento de Auth: ${event}`, session);
+  if (session) {
+    renderDashboard(session);
+  } else {
+    renderAuthForm();
+  }
+});
