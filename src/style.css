@@ -427,3 +427,15 @@ code {
 .user-dashboard p {
   margin-bottom: 20px;
 }
+
+/* Estilos para el formulario de carga libre de materias */
+#materias-form select.auth-input,
+#materias-form textarea.auth-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#materias-form label {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
