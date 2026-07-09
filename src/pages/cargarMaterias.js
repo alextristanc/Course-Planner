@@ -1,6 +1,8 @@
 import { supabase } from '../supabaseClient.js';
 import { escapeHtml, normalizarEstado } from '../utils.js';
 
+let currentRenderId = 0;
+
 // Mostrar errores o mensajes de éxito
 function showMessage(type, text) {
   const errorEl = document.getElementById('auth-error');
@@ -23,6 +25,7 @@ function showMessage(type, text) {
 }
 
 export function renderCargarMaterias(session) {
+  const renderId = ++currentRenderId;
   const appEl = document.querySelector('#app');
   const userEmail = escapeHtml(session?.user?.email || 'Usuario');
 
@@ -53,10 +56,10 @@ export function renderCargarMaterias(session) {
     await supabase.auth.signOut();
   });
 
-  initCargarMaterias(session);
+  initCargarMaterias(session, renderId);
 }
 
-async function initCargarMaterias(session) {
+async function initCargarMaterias(session, renderId) {
   const loadingMessageEl = document.getElementById('loading-message');
   const formContainerEl = document.getElementById('main-form-container');
 
@@ -75,6 +78,8 @@ async function initCargarMaterias(session) {
       .select('*')
       .eq('user_id', userId);
 
+    if (renderId !== currentRenderId) return;
+    console.log('Materias fetched:', { data: materiasUsuario, error: materiasError }); // Added for debugging
     if (materiasError) throw materiasError;
 
     // Reconstruir el string para el textarea
@@ -93,6 +98,7 @@ async function initCargarMaterias(session) {
       .eq('user_id', userId)
       .maybeSingle();
 
+    if (renderId !== currentRenderId) return;
     if (prefError) throw prefError;
 
     const tipoPeriodo = prefUsuario?.tipo_periodo || 'semestral';
@@ -100,6 +106,7 @@ async function initCargarMaterias(session) {
     const minMaterias = prefUsuario?.min_materias !== undefined && prefUsuario?.min_materias !== null ? prefUsuario.min_materias : '';
 
     // 3. Generar HTML del Formulario
+    if (renderId !== currentRenderId) return;
     formContainerEl.innerHTML = `
       <form id="materias-form" style="max-width: 600px; margin: 0 auto; text-align: left; display: flex; flex-direction: column; gap: 20px;">
         <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -140,10 +147,13 @@ async function initCargarMaterias(session) {
     document.getElementById('materias-form').addEventListener('submit', (e) => handleSubmit(e, userId));
 
   } catch (error) {
+    if (renderId !== currentRenderId) return; // Ignorar errores de renders obsoletos
     console.error('Error al inicializar la página:', error.message);
     showMessage('error', `Error al inicializar la página: ${error.message}`);
   } finally {
-    loadingMessageEl.style.display = 'none';
+    if (renderId === currentRenderId) { // Solo ocultar si es el render actual
+      loadingMessageEl.style.display = 'none';
+    }
   }
 }
 

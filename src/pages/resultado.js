@@ -3,7 +3,7 @@ import { escapeHtml } from '../utils.js';
 
 export function renderResultado(session) {
   const appEl = document.querySelector('#app');
-  const userEmail = session?.user?.email || 'Usuario';
+  const userEmail = escapeHtml(session?.user?.email || 'Usuario');
 
   appEl.innerHTML = `
     <div class="user-dashboard">
