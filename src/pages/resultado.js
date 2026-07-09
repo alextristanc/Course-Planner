@@ -1,4 +1,5 @@
 import { supabase } from '../supabaseClient.js';
+import { escapeHtml } from '../utils.js';
 
 export function renderResultado(session) {
   const appEl = document.querySelector('#app');

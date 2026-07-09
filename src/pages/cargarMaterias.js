@@ -1,4 +1,5 @@
 import { supabase } from '../supabaseClient.js';
+import { escapeHtml, normalizarEstado } from '../utils.js';
 
 // Mostrar errores o mensajes de éxito
 function showMessage(type, text) {
@@ -23,7 +24,7 @@ function showMessage(type, text) {
 
 export function renderCargarMaterias(session) {
   const appEl = document.querySelector('#app');
-  const userEmail = session?.user?.email || 'Usuario';
+  const userEmail = escapeHtml(session?.user?.email || 'Usuario');
 
   appEl.innerHTML = `
     <div class="user-dashboard">
@@ -78,14 +79,12 @@ async function initCargarMaterias(session) {
 
     // Reconstruir el string para el textarea
     let materiasTexto = '';
-    if (materiasUsuario && materiasUsuario.length > 0) {
-      materiasTexto = materiasUsuario.map(m => {
-        const nombreStr = m.nombre || '';
-        const estadoStr = m.estado || '';
-        const creditosStr = m.creditos !== null && m.creditos !== undefined ? m.creditos : '';
-        return `${nombreStr} | ${estadoStr} | ${creditosStr}`;
-      }).join('\n');
-    }
+    materiasTexto = materiasUsuario.map(m => {
+      const nombreStr = escapeHtml(m.nombre || '');
+      const estadoStr = escapeHtml(m.estado || '');
+      const creditosStr = m.creditos !== null && m.creditos !== undefined ? m.creditos : '';
+      return `${nombreStr} | ${estadoStr} | ${creditosStr}`;
+    }).join('\n');
 
     // 2. Traer preferencias_usuario
     const { data: prefUsuario, error: prefError } = await supabase
@@ -179,6 +178,7 @@ async function handleSubmit(e, userId) {
       }
 
       const estado = partes[1] ? partes[1].trim() : null;
+      const estadoNormalizado = estado ? normalizarEstado(estado) : null;
       let creditos = null;
       if (partes[2] && partes[2].trim()) {
         const parsedCreditos = parseFloat(partes[2].trim());
@@ -191,7 +191,7 @@ async function handleSubmit(e, userId) {
       parsedMaterias.push({
         user_id: userId,
         nombre: nombre,
-        estado: estado || null,
+        estado: estadoNormalizado,
         creditos: creditos,
         metadata: { linea_original: lineaOriginal }
       });

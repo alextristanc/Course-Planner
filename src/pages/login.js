@@ -1,4 +1,5 @@
 import { supabase } from '../supabaseClient.js';
+import { escapeHtml } from '../utils.js';
 
 // Mostrar errores o mensajes de éxito
 function showMessage(type, text) {
