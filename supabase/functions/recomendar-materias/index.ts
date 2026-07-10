@@ -1,5 +1,42 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
+function filtrarMateriasInventadas(
+  recomendacion: any,
+  nombresValidos: Set<string>,
+  userId: string
+): any {
+  if (!recomendacion.periodos || !Array.isArray(recomendacion.periodos)) {
+    return recomendacion;
+  }
+
+  const periodosFiltrados = recomendacion.periodos.map((periodo: any) => {
+    if (!periodo.materias || !Array.isArray(periodo.materias)) {
+      return periodo;
+    }
+
+    const materiasReales = periodo.materias.filter((materia: any) => {
+      if (!nombresValidos.has(materia.nombre)) {
+        console.warn(
+          `[recomendar-materias] Materia inventada descartada: "${materia.nombre}" ` +
+          `(usuario: ${userId})`
+        );
+        return false;
+      }
+      return true;
+    });
+
+    return { ...periodo, materias: materiasReales };
+  });
+
+  // Eliminar períodos que quedaron sin materias
+  return {
+    ...recomendacion,
+    periodos: periodosFiltrados.filter(
+      (periodo: any) => periodo.materias && periodo.materias.length > 0
+    ),
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', {
@@ -100,6 +137,44 @@ Reglas:
   ]
 }`;
 
+    const nombresMaterias = materiasPendientes.map((m) => m.nombre);
+    const schema = {
+      type: 'object',
+      properties: {
+        resumen: { type: 'string' },
+        periodos: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              numero: { type: 'integer' },
+              materias: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    nombre: {
+                      type: 'string',
+                      enum: nombresMaterias,
+                    },
+                    creditos: { type: 'number' },
+                    prioridad: {
+                      type: 'string',
+                      enum: ['alta', 'media', 'baja'],
+                    },
+                    justificacion: { type: 'string' },
+                  },
+                  required: ['nombre', 'creditos', 'prioridad', 'justificacion'],
+                },
+              },
+            },
+            required: ['numero', 'materias'],
+          },
+        },
+      },
+      required: ['resumen', 'periodos'],
+    };
+
     const geminiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${Deno.env.get('GEMINI_API_KEY')}`,
       {
@@ -109,6 +184,7 @@ Reglas:
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
             responseMimeType: 'application/json',
+            responseSchema: schema,
           },
         }),
       }
@@ -133,6 +209,10 @@ Reglas:
       console.error('Respuesta de Gemini no es JSON válido:', textoRespuesta);
       throw new Error('La IA devolvió un formato inválido. Intenta de nuevo.');
     }
+
+    // Capa 2: Validación de respaldo — filtrar materias que no estén en la lista real
+    const nombresValidos = new Set(materiasPendientes.map((m) => m.nombre));
+    recomendacion = filtrarMateriasInventadas(recomendacion, nombresValidos, user.id);
 
     const { data: inserted, error: insertError } = await supabase
       .from('recomendaciones')
