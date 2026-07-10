@@ -140,11 +140,34 @@ async function initCargarMaterias(session, renderId) {
         <button type="submit" id="btn-save" class="auth-btn auth-btn-primary" style="margin-top: 10px;">
           Guardar progreso
         </button>
+        <button type="button" id="btn-generate" class="auth-btn auth-btn-primary" style="margin-top: 10px; display: none;">
+          Generar recomendación
+        </button>
       </form>
     `;
 
-    // 4. Adjuntar manejador submit
+    // 4. Adjuntar manejadores
     document.getElementById('materias-form').addEventListener('submit', (e) => handleSubmit(e, userId));
+    document.getElementById('btn-generate').addEventListener('click', handleGenerateRecommendation);
+
+    // Si el usuario edita algo después de guardar, ocultar el botón de recomendación
+    // para evitar generar con datos desactualizados.
+    const hideGenerateOnChange = () => {
+      const btnGenerate = document.getElementById('btn-generate');
+      if (btnGenerate) {
+        btnGenerate.style.display = 'none';
+        btnGenerate.disabled = true;
+        btnGenerate.textContent = 'Generar recomendación';
+      }
+    };
+
+    ['materias-texto', 'tipo-periodo', 'min-materias', 'max-materias'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', hideGenerateOnChange);
+        el.addEventListener('change', hideGenerateOnChange);
+      }
+    });
 
   } catch (error) {
     if (renderId !== currentRenderId) return; // Ignorar errores de renders obsoletos
@@ -246,6 +269,12 @@ async function handleSubmit(e, userId) {
     if (upsertError) throw upsertError;
 
     showMessage('success', 'Progreso y preferencias guardados con éxito.');
+    
+    const btnGenerate = document.getElementById('btn-generate');
+    if (btnGenerate) {
+      btnGenerate.style.display = 'block';
+      btnGenerate.disabled = false;
+    }
 
   } catch (error) {
     console.error('Error al guardar el progreso:', error.message);
@@ -254,5 +283,47 @@ async function handleSubmit(e, userId) {
     btnSave.disabled = false;
     btnSave.textContent = 'Guardar progreso';
   }
-  
+}
+
+async function handleGenerateRecommendation() {
+  const btnGenerate = document.getElementById('btn-generate');
+  btnGenerate.disabled = true;
+  btnGenerate.textContent = 'Generando recomendación...';
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.access_token) {
+      throw new Error('Tu sesión ha expirado. Por favor, reinicia sesión.');
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/recomendar-materias`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.status === 401) {
+      throw new Error('Sesión no autorizada. Por favor, reinicia sesión.');
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Error del servidor: ${response.status}`);
+    }
+
+    const result = await response.json();
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    window.location.hash = '#/resultado';
+  } catch (error) {
+    console.error('Error al generar recomendación:', error.message);
+    showMessage('error', error.message);
+    btnGenerate.textContent = 'Generar recomendación';
+    btnGenerate.disabled = false;
+  }
 }
