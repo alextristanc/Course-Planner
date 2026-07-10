@@ -1,3 +1,5 @@
+// src/utils.js
+
 // Escapa caracteres HTML peligrosos para evitar XSS al insertar
 // texto dinámico dentro de innerHTML.
 export function escapeHtml(str) {
@@ -22,13 +24,33 @@ export function normalizarEstado(estadoRaw) {
 
   if (ESTADOS_VALIDOS.includes(limpio)) return limpio;
 
-  // Tolerar variaciones comunes (typos / acentos)
   if (limpio.startsWith('aprob')) return 'aprobada';
   if (limpio.startsWith('curs')) return 'cursando';
   if (limpio.startsWith('pend')) return 'pendiente';
 
-  // Si no matchea nada conocido, se guarda tal cual pero avisamos
-  // en consola para que no sea un bug silencioso.
   console.warn(`Estado no reconocido: "${estadoRaw}". Se guardará sin normalizar.`);
   return limpio;
+}
+
+// Filtra materias aprobadas y arma el contexto que se le manda a la IA.
+// Se hace en el cliente (no en la Edge Function) para no mandar datos
+// de más y porque es lógica simple que no necesita estar en el servidor.
+export function prepararContextoParaIA(materiasUsuario, preferencias) {
+  const materiasPendientes = materiasUsuario
+    .filter((m) => m.estado !== 'aprobada')
+    .map((m) => ({
+      nombre: m.nombre,
+      estado: m.estado || 'pendiente',
+      creditos: m.creditos ?? null
+    }));
+
+  return {
+    materias: materiasPendientes,
+    total_aprobadas: materiasUsuario.length - materiasPendientes.length,
+    preferencias: {
+      tipo_periodo: preferencias?.tipo_periodo || 'semestral',
+      min_materias: preferencias?.min_materias ?? null,
+      max_materias: preferencias?.max_materias ?? null
+    }
+  };
 }

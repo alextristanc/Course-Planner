@@ -1,5 +1,5 @@
 import { supabase } from '../supabaseClient.js';
-import { escapeHtml, normalizarEstado } from '../utils.js';
+import { escapeHtml, normalizarEstado, prepararContextoParaIA } from '../utils.js';
 
 let currentRenderId = 0;
 
@@ -174,7 +174,7 @@ async function handleSubmit(e, userId) {
     // Parsear textarea línea por línea
     const lineas = materiasTextoVal.split('\n');
     const parsedMaterias = [];
-
+    console.log(prepararContextoParaIA(parsedMaterias, { tipo_periodo: tipoPeriodoVal, min_materias: minMateriasVal, max_materias: maxMateriasVal }));
     for (let i = 0; i < lineas.length; i++) {
       const lineaOriginal = lineas[i];
       const linea = lineaOriginal.trim();
@@ -206,6 +206,11 @@ async function handleSubmit(e, userId) {
         metadata: { linea_original: lineaOriginal }
       });
     }
+    console.log(prepararContextoParaIA(parsedMaterias, {
+  tipo_periodo: tipoPeriodoVal,
+  min_materias: minMateriasVal,
+  max_materias: maxMateriasVal
+}));
 
     // Validación: que al menos una materia sea válida y no se borre todo si no hay materias parseadas
     if (parsedMaterias.length === 0) {
@@ -249,4 +254,5 @@ async function handleSubmit(e, userId) {
     btnSave.disabled = false;
     btnSave.textContent = 'Guardar progreso';
   }
+  
 }
