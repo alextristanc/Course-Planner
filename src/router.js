@@ -1,14 +1,20 @@
 import { renderLogin } from './pages/login.js';
 import { renderDashboard } from './pages/dashboard.js';
-import { renderCargarMaterias } from './pages/cargarMaterias.js';
+import { renderPlanAcademico } from './pages/planAcademico.js';
+import { renderOferta } from './pages/oferta.js';
+import { renderParametros } from './pages/parametros.js';
 import { renderResultado } from './pages/resultado.js';
 
 // Mapa de rutas con renderizador y flag de privacidad
 export const routes = {
   '#/login': { render: renderLogin, private: false },
   '#/dashboard': { render: renderDashboard, private: true },
-  '#/materias': { render: renderCargarMaterias, private: true },
-  '#/resultado': { render: renderResultado, private: true }
+  '#/plan': { render: renderPlanAcademico, private: true },
+  '#/oferta': { render: renderOferta, private: true },
+  '#/parametros': { render: renderParametros, private: true },
+  '#/resultado': { render: renderResultado, private: true },
+  // Compatibilidad con rutas antiguas
+  '#/materias': { render: renderPlanAcademico, private: true }
 };
 
 let currentSession = null;

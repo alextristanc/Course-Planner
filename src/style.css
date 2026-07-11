@@ -519,3 +519,381 @@ code {
   font-size: 14px;
   margin-bottom: 4px;
 }
+
+/* ==============================================
+   NUEVAS PÁGINAS - Plan, Oferta, Parámetros, Resultado
+   ============================================== */
+
+.page-wide {
+  max-width: 100% !important;
+}
+
+.card-section {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+}
+
+.card-section h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.hint-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 4px 0;
+}
+
+.app-nav {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 16px 0 24px;
+  flex-wrap: wrap;
+}
+
+.app-nav-link {
+  display: inline-block;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  transition: all 0.2s ease;
+}
+
+.app-nav-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.app-nav-link.active {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.upload-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.upload-row input[type="file"] {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-family: var(--sans);
+}
+
+.upload-row input[type="file"]::file-selector-button {
+  padding: 4px 12px;
+  margin-right: 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.upload-row input[type="file"]::file-selector-button:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+}
+
+.data-table thead th {
+  padding: 10px 12px;
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+
+.data-table tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+  background: var(--accent-bg);
+}
+
+.data-table .auth-input {
+  width: 100%;
+  min-width: 100px;
+  box-sizing: border-box;
+}
+
+.mono-cell {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.bloque-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.bloque-form .auth-input {
+  flex: 1;
+  min-width: 100px;
+}
+
+.bloque-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bloque-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: var(--code-bg);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.result-card {
+  padding: 14px 16px;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 10px;
+  border-left: 4px solid var(--border);
+}
+
+.result-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.result-card-header strong {
+  color: var(--text-h);
+  font-size: 16px;
+}
+
+.prio-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-h);
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 14px;
+}
+
+.flow-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.flow-steps li {
+  padding: 14px 18px;
+  background: var(--code-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.flow-steps li a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.flow-steps li a:hover {
+  text-decoration: underline;
+}
+
+/* ==============================================
+   EDITOR DE HORARIOS - Oferta
+   ============================================== */
+
+.horario-cell {
+  min-width: 280px;
+}
+
+.horario-bloques-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.horario-bloque {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px 3px 8px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text-h);
+}
+
+.horario-bloque-texto {
+  white-space: nowrap;
+}
+
+.btn-remove-bloque {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #ef4444;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.btn-remove-bloque:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.horario-editor-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.horario-add-form {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.horario-add-form .auth-input {
+  padding: 4px 6px;
+  font-size: 12px;
+  font-family: var(--mono);
+}
+
+@media (max-width: 768px) {
+  .upload-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .upload-row input[type="file"] {
+    min-width: auto;
+  }
+  .data-table {
+    font-size: 13px;
+  }
+  .data-table thead th,
+  .data-table tbody td {
+    padding: 6px 8px;
+  }
+  .bloque-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .app-nav {
+    gap: 4px;
+  }
+  .app-nav-link {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  .horario-cell {
+    min-width: 200px;
+  }
+  .horario-add-form {
+    flex-direction: row;
+  }
+}
