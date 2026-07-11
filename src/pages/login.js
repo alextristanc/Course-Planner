@@ -48,6 +48,14 @@ export function renderLogin() {
             <button type="button" id="btn-register" class="auth-btn auth-btn-secondary">Registrarse</button>
           </div>
         </form>
+
+        <div class="auth-divider">
+          <span>o</span>
+        </div>
+
+        <button type="button" id="btn-google" class="auth-btn auth-btn-google">
+          Iniciar sesión con Google
+        </button>
       </div>
     </div>
   `;
@@ -114,6 +122,24 @@ export function renderLogin() {
         showMessage('success', '¡Usuario registrado e ingresado con éxito!');
       }
       setSubmitting(false);
+    }
+  });
+
+  // Acción: Iniciar sesión con Google
+  const btnGoogle = document.getElementById('btn-google');
+  btnGoogle.addEventListener('click', async () => {
+    showMessage('clear');
+    btnGoogle.disabled = true;
+    btnGoogle.textContent = 'Redirigiendo...';
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+    });
+
+    if (error) {
+      showMessage('error', error.message || 'Error al iniciar sesión con Google.');
+      btnGoogle.disabled = false;
+      btnGoogle.textContent = 'Iniciar sesión con Google';
     }
   });
 }
